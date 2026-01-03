@@ -71,22 +71,44 @@ todoList.addEventListener("click", (event) => {
 
   if (action === "toggle") {
     todos = toggleTodoList(todos, todoId);
+    renderList();
   } else if (action === "delete") {
     todos = deleteTodoItem(todos, todoId);
+    renderList();
   } else if (action === "edit") {
-    const newTitle = prompt(
-      "Update todo title:",
-      findTodoItemById(todos, todoId).title
-    );
+    const titleSpan = event.target;
 
-    if (newTitle !== null && newTitle.trim() !== "") {
-      const todoItem = findTodoItemById(todos, todoId);
-      const updatedItem = updateTodoItemTitle(todoItem, newTitle.trim());
-      todos = todos.map((item) => (item.id === todoId ? updatedItem : item));
-    } else {
-      return;
-    }
+    // Create an input element
+    const input = document.createElement("input");
+    input.type = "text";
+    input.value = titleSpan.textContent;
+    input.className = "edit-input";
+
+    // Replace span with input
+    titleSpan.replaceWith(input);
+    input.focus();
+    input.select();
+
+    const saveEdit = () => {
+      const newTitle = input.value.trim();
+      if (newTitle) {
+        const todoItem = findTodoItemById(todos, todoId);
+        const updatedItem = updateTodoItemTitle(todoItem, newTitle);
+        todos = todos.map((item) => (item.id === todoId ? updatedItem : item));
+      }
+      renderList();
+    };
+
+    // Save on Enter, cancel on Escape, save on blur (ie. click outside)
+    input.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") {
+        saveEdit();
+      } else if (e.key === "Escape") {
+        renderList(); // Cancel edit
+      }
+    });
+    input.addEventListener("blur", () => {
+      input.replaceWith(titleSpan);
+    });
   }
-
-  renderList();
 });
