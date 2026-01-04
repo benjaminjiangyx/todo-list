@@ -13,6 +13,7 @@ const form = document.getElementById("todo-form");
 const input = document.getElementById("todo-input");
 const todoList = document.getElementById("todo-list");
 const prioritySelect = document.getElementById("priority-select");
+const dueDateInput = document.getElementById("due-date-input");
 let todos = [];
 
 function renderList() {
@@ -41,6 +42,12 @@ function renderList() {
     priorityBadge.dataset.action = "change-priority";
     priorityBadge.title = "Click to change priority";
 
+    const date = document.createElement("span");
+    date.textContent = new Date(todo.dueDate).toLocaleDateString();
+    date.className = "due-date";
+    date.dataset.action = "set-date";
+    date.title = "Click to set due date";
+
     const deleteButton = document.createElement("button");
     deleteButton.textContent = "Delete";
     deleteButton.className = "delete-button";
@@ -50,6 +57,7 @@ function renderList() {
     listItem.appendChild(title);
     listItem.appendChild(priorityBadge);
     listItem.appendChild(deleteButton);
+    listItem.appendChild(date);
     todoList.appendChild(listItem);
   }
 }
@@ -59,15 +67,21 @@ form.addEventListener("submit", (event) => {
   event.preventDefault();
   const todoText = input.value.trim();
   if (todoText) {
+    // Get the due date from the date input, or use current date if not set
+    const dueDate = dueDateInput.valueAsDate
+      ? dueDateInput.valueAsDate.getTime()
+      : Date.now();
+
     const todo = createTodoItem({
       id: Date.now().toString(),
       title: todoText,
       completed: false,
-      dueDate: Date.now(),
+      dueDate: dueDate,
       priority: prioritySelect.value || PRIORITY_NORMAL,
     });
     todos = addTodoItem(todos, todo);
     input.value = "";
+    dueDateInput.value = ""; // Clear the date input
     renderList();
   }
 });
@@ -94,9 +108,15 @@ todoList.addEventListener("click", (event) => {
     const select = document.createElement("select");
     select.className = "priority-select-inline";
     select.innerHTML = `
-      <option value="low" ${currentPriority === 'low' ? 'selected' : ''}>Low</option>
-      <option value="normal" ${currentPriority === 'normal' ? 'selected' : ''}>Normal</option>
-      <option value="high" ${currentPriority === 'high' ? 'selected' : ''}>High</option>
+      <option value="low" ${
+        currentPriority === "low" ? "selected" : ""
+      }>Low</option>
+      <option value="normal" ${
+        currentPriority === "normal" ? "selected" : ""
+      }>Normal</option>
+      <option value="high" ${
+        currentPriority === "high" ? "selected" : ""
+      }>High</option>
     `;
 
     event.target.replaceWith(select);
@@ -148,5 +168,30 @@ todoList.addEventListener("click", (event) => {
       input.replaceWith(titleSpan);
     });
   } else if (action === "set-date") {
+    const dateSpan = event.target;
+
+    // Create an input element
+    const input = document.createElement("input");
+    input.type = "date";
+    const todoItem = findTodoItemById(todos, todoId);
+    const dueDate = new Date(todoItem.dueDate);
+    input.valueAsDate = dueDate;
+    input.className = "date-input";
+
+    // Replace span with input
+    dateSpan.replaceWith(input);
+    input.focus();
+
+    const saveDate = () => {
+      const newDueDate = input.valueAsDate;
+      if (newDueDate) {
+        const updatedItem = updateTodoItemDate(todoItem, newDueDate.getTime());
+        todos = todos.map((item) => (item.id === todoId ? updatedItem : item));
+      }
+      renderList();
+    };
+
+    // Save on change or blur
+    input.addEventListener("change", saveDate);
   }
 });
