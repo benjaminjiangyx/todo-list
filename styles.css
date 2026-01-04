@@ -1,0 +1,35 @@
+.todo-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 0;
+}
+
+.priority-badge {
+  cursor: pointer;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 0.85em;
+}
+
+.priority-low {
+  background: #90EE90;
+}
+
+.priority-normal {
+  background: #FFD700;
+}
+
+.priority-high {
+  background: #FF6B6B;
+  color: white;
+}
+
+.priority-badge:hover {
+  opacity: 0.8;
+}
+
+.delete-button {
+  margin-left: auto;
+  cursor: pointer;
+}

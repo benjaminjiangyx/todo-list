@@ -1,12 +1,20 @@
+export const PRIORITY_LOW = "low";
+export const PRIORITY_NORMAL = "normal";
+export const PRIORITY_HIGH = "high";
+
 export function createTodoItem({
   id = Date.now().toString(),
   title,
   completed = false,
+  dueDate = Date.now(),
+  priority = PRIORITY_NORMAL,
 }) {
   return {
-    id: id,
-    title: title,
-    completed: completed,
+    id,
+    title,
+    completed,
+    dueDate,
+    priority,
   };
 }
 
@@ -42,4 +50,15 @@ export function deleteTodoItem(todoList, todoItemId) {
 
 export function findTodoItemById(todoList, todoItemId) {
   return todoList.find((item) => item.id === todoItemId);
+}
+
+export function sortTodoListByDueDate(todoList) {
+  return [...todoList].sort((a, b) => a.dueDate - b.dueDate);
+}
+
+export function updateTodoItemDate(todoItem, newDueDate) {
+  return {
+    ...todoItem,
+    dueDate: newDueDate,
+  };
 }

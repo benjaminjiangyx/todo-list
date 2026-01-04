@@ -11,7 +11,17 @@
       <!-- Add class so CSS doesn't style all h1's the same -->
       <h1>Todo List</h1>
       <form id="todo-form">
-        <input type="text" id="todo-input" placeholder="Add a new task..." autocomplete="off" />
+        <input
+          type="text"
+          id="todo-input"
+          placeholder="Add a new task..."
+          autocomplete="off"
+        />
+        <select id="priority-select">
+          <option value="low">Low</option>
+          <option value="normal" selected>Normal</option>
+          <option value="high">High</option>
+        </select>
         <button type="submit">Add</button>
       </form>
       <ul id="todo-list"></ul>

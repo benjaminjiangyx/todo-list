@@ -5,11 +5,14 @@ import {
   updateTodoItemTitle,
   addTodoItem,
   findTodoItemById,
+  updateTodoItemDate,
+  PRIORITY_NORMAL,
 } from "./todo.js";
 
 const form = document.getElementById("todo-form");
 const input = document.getElementById("todo-input");
 const todoList = document.getElementById("todo-list");
+const prioritySelect = document.getElementById("priority-select");
 let todos = [];
 
 function renderList() {
@@ -32,6 +35,12 @@ function renderList() {
       title.style.textDecoration = "line-through";
     }
 
+    const priorityBadge = document.createElement("span");
+    priorityBadge.textContent = todo.priority;
+    priorityBadge.className = `priority-badge priority-${todo.priority}`;
+    priorityBadge.dataset.action = "change-priority";
+    priorityBadge.title = "Click to change priority";
+
     const deleteButton = document.createElement("button");
     deleteButton.textContent = "Delete";
     deleteButton.className = "delete-button";
@@ -39,6 +48,7 @@ function renderList() {
 
     listItem.appendChild(checkbox);
     listItem.appendChild(title);
+    listItem.appendChild(priorityBadge);
     listItem.appendChild(deleteButton);
     todoList.appendChild(listItem);
   }
@@ -53,6 +63,8 @@ form.addEventListener("submit", (event) => {
       id: Date.now().toString(),
       title: todoText,
       completed: false,
+      dueDate: Date.now(),
+      priority: prioritySelect.value || PRIORITY_NORMAL,
     });
     todos = addTodoItem(todos, todo);
     input.value = "";
@@ -75,6 +87,31 @@ todoList.addEventListener("click", (event) => {
   } else if (action === "delete") {
     todos = deleteTodoItem(todos, todoId);
     renderList();
+  } else if (action === "change-priority") {
+    const currentPriority = findTodoItemById(todos, todoId).priority;
+
+    // Create a temporary select dropdown
+    const select = document.createElement("select");
+    select.className = "priority-select-inline";
+    select.innerHTML = `
+      <option value="low" ${currentPriority === 'low' ? 'selected' : ''}>Low</option>
+      <option value="normal" ${currentPriority === 'normal' ? 'selected' : ''}>Normal</option>
+      <option value="high" ${currentPriority === 'high' ? 'selected' : ''}>High</option>
+    `;
+
+    event.target.replaceWith(select);
+    select.focus();
+
+    select.addEventListener("change", () => {
+      const todoItem = findTodoItemById(todos, todoId);
+      const updatedItem = { ...todoItem, priority: select.value };
+      todos = todos.map((item) => (item.id === todoId ? updatedItem : item));
+      renderList();
+    });
+
+    select.addEventListener("blur", () => {
+      renderList(); // Cancel if they click away
+    });
   } else if (action === "edit") {
     const titleSpan = event.target;
 
@@ -110,5 +147,6 @@ todoList.addEventListener("click", (event) => {
     input.addEventListener("blur", () => {
       input.replaceWith(titleSpan);
     });
+  } else if (action === "set-date") {
   }
 });
